@@ -1,0 +1,10 @@
+library(RPostgreSQL)
+library(ggplot2)
+require(gridExtra)
+library("plot3D")
+require(tree)
+library(caret)
+library(partykit)
+library("reshape2")
+library(rpart)
+library(doParallel
