@@ -12,11 +12,10 @@ con <- dbConnect(drv, host='172.25.187.111', port='5432', dbname='abhinav',
 
 
   query<-paste(" select time_stamp ,distance_along_road,speed,is_accident from semsim_output WHERE iteration_count="
-               ,50," AND time_stamp <=7200 AND  distance_along_road<=13000", sep="")
+               ,51," AND time_stamp <=7200 AND  distance_along_road<=13000", sep="")
 
 
 distBreaks=c(0.0, 745.13, 1441.13, 2907.97, 4645.05, 6001.21, 7184.86, 7741.78, 8300.75, 11445.9, 11794.3 )
-
 distLabels=c( 0.0, 745.13, 1441.13, 2907.97, 4645.05, 6001.21, 7184.86, 7741.78, 8300.75,11445.9)
 
 

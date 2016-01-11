@@ -14,8 +14,8 @@ con <- dbConnect(drv, host='172.25.187.111', port='5432', dbname='abhinav',
                  user='abhinav', password='qwert$$123')
 
 
-day=21
-month=9
+day=3
+month=8
 hours="(17,18)"
 
 
