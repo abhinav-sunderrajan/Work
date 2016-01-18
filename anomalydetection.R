@@ -1,3 +1,6 @@
+#Compare the PIE models at different time steps of two minutes each.
+#ideally I compare scenarios where flow along ramps increases and accidents
+
 library(RPostgreSQL)
 library(ggplot2)
 require(gridExtra)
@@ -14,23 +17,24 @@ drv <- dbDriver("PostgreSQL")
 con <- dbConnect(drv, host='172.25.187.111', port='5432', dbname='abhinav',
                  user='abhinav', password='qwert$$123')
 
-      times1=c(1600)
+      times1=c(1200,1600,2100,3000,4400)
       times2=times1+120
       penetration=1.0
 
       pieModels=list()
+      fitList=list()
 
 
-        for(time in 1:1){
+        for(time in 1:length(times1)){
             time1=times1[time]
             time2=times2[time]
             
-            query<-paste("select distance_along_road as distance,speed,time_stamp,agent_id from semsim_output WHERE iteration_count=51  AND time_stamp >=",time1, " AND time_stamp <=",time2," AND distance_along_road<=13000", sep="")
+            query<-paste("select distance_along_road as distance,speed,time_stamp,agent_id from semsim_output WHERE iteration_count=54  AND time_stamp >=",time1, " AND time_stamp <=",time2," AND distance_along_road<=13000", sep="")
             training<-dbGetQuery(con,query)
             
             
             #Decision tree rpart
-            set.seed(108)
+            set.seed(1008)
             
             modelFit <- rpart(speed ~ distance,data=training,control=rpart.control(maxdepth=15))
             #rpart1a <- as.party(modelFit)
@@ -95,9 +99,8 @@ con <- dbConnect(drv, host='172.25.187.111', port='5432', dbname='abhinav',
             ls_speed=ls_speed[good]
             ls_density=ls_density[good]
             fit=lm(ls_density~log(ls_speed))
-            
-            summary(fit)$r.squared 
-            
+            fitList[[toString(time1)]]=fit
+                        
             
             
             densityList=list()
@@ -121,17 +124,39 @@ con <- dbConnect(drv, host='172.25.187.111', port='5432', dbname='abhinav',
             
             d=data.frame(as.numeric(flow1),as.numeric(speed1),as.numeric(density1),row.names=names(speedList))
             colnames(d)=c("Flow","Speed","Density")
-            pieModels[[toString(time)]]=d
-            print(summary(d))
-            print(paste("Finished model ",time,sep=""))
+            pieModels[[toString(time1)]]=d
+            #print(summary(d))
+            print(paste("Finished model ",time1,sep=""))
             
         }
 
       
       
       
-      
-      
+      newdata = data.frame(ls_speed=10)
+      predict(fitList[[1]], newdata, interval="confidence") 
+
+# When the data contains y values in a column, use stat="identity"
+
+pieModels<-lapply(pieModels,function(x){
+      x$Distance=as.numeric(rownames(x))
+      x <- rbind( x, data.frame("Flow"=0, "Speed"=0,"Density"=0,"Distance"=13000))
+      x
+})
+
+
+
+onramps=c(583.98, 2489.87,4071.9,5531.18,5965.29,7025.15,7658.4,8554.28,9591.84,11286.2,11637.04)
+
+plot=ggplot(pieModels[[1]],aes(y=Density,x=Distance))+scale_x_continuous(breaks = onramps,lim=c(0, 13000))+ 
+      theme(text = element_text(size=20),axis.text.x = element_text(angle=45))+
+      geom_step(aes(color=paste(times1[1],"")),size=1)+
+      geom_step(data=pieModels[[2]],aes(color=paste(times1[2],"")),size=1)+
+      geom_step(data=pieModels[[3]],aes(color=paste(times1[3],"")),size=1)+
+      geom_step(data=pieModels[[4]],aes(color=paste(times1[4],"")),size=1)+
+      geom_step(data=pieModels[[5]],aes(color=paste(times1[5],"")),size=1)+
+      labs(color="Time step in seconds")   
+plot
       
       
       #Close Database connection

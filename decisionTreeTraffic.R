@@ -15,7 +15,7 @@ con <- dbConnect(drv, host='172.25.187.111', port='5432', dbname='abhinav',
                  user='abhinav', password='qwert$$123')
 
 
-times1=c(1000,3600,4000,4500,5000)
+times1=c(4500)
 times2=times1+120
 
 penetrations=c(0.05,0.1,0.2,0.3,0.4,0.5,1.0)
@@ -75,12 +75,12 @@ rSquare<-function(distance_split,time1,time2,penetration,splits){
   fit=lm(ls_density~log(ls_speed))
  
   
-  #if((time1==4500 & time2==4620) & penetration==1.0){
-  # plot(ls_speed,ls_density,xlab="",ylab="",cex.axis = 1.50,cex.lab=1.5)
-  #  points(ls_speed, predict(fit), col="red")
-  #  mtext("Speed (m/s)", 1, 2.5,cex=1.5)
-  # mtext("Density (veh/km)", 2, 2.5,cex=1.5)
-  #}
+  if((time1==4500 & time2==4620) & penetration==1.0){
+   plot(ls_speed,ls_density,xlab="",ylab="",cex.axis = 1.50,cex.lab=1.5,xlim=c(0,20),ylim=c(0,250))
+    points(ls_speed, predict(fit), col="red")
+    mtext("Speed (m/s)", 1, 2.5,cex=1.5)
+   mtext("Density (veh/km)", 2, 2.5,cex=1.5)
+  }
   summary(fit)$r.squared 
   
 }
@@ -123,9 +123,9 @@ sdSplits<-function(distance_split,time1,time2,penetration,splits){
 
 
 
-for(i in 1:5){
+for(i in 1:1){
   
-  query<-paste("select distance_along_road as distance,speed,time_stamp,agent_id from semsim_output WHERE iteration_count=3  AND time_stamp >=",times1[i], " AND time_stamp <=",times2[i]," AND distance_along_road<=13000", sep="")
+  query<-paste("select distance_along_road as distance,speed,time_stamp,agent_id from semsim_output WHERE iteration_count=47  AND time_stamp >=",times1[i], " AND time_stamp <=",times2[i]," AND distance_along_road<=13000", sep="")
   data<-dbGetQuery(con,query)
   set.seed(i)
   
